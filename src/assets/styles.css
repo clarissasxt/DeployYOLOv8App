@@ -1,0 +1,41 @@
+/* styles.css */
+
+#graph-dropdown .Select-control {
+    background-color: grey; /* Light blue color */
+    border: 1px solid;
+    border-color: white;
+}
+
+/* dropdown menu options */
+#graph-dropdown .VirtualizedSelectOption {
+    background-color: grey;
+    color: white;
+}
+
+#graph-dropdown .Select-menu-outer {
+    background-color: rgb(158, 156, 156); 
+    border: 1px solid white;
+}
+
+#graph-dropdown .Select-value-label {
+    color: white;
+}
+
+#graph-dropdown .Select--single > .Select-control .Select-value, .Select-placeholder {
+    border: 1px solid grey;
+    border-radius: 4px;
+}
+
+/* this colors the input box text and x  of multi dropdown*/
+#graph-dropdown .Select--multi .Select-value {
+    color: white;
+}
+
+#graph-dropdown .Select-control .Select-clear-zone {
+    color: white;
+}
+
+#graph-dropdown .Select-control span .Select-arrow-zone {
+    color: white;
+}
+
