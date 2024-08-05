@@ -16,6 +16,7 @@ VIDEO_FILE = 'DJI_0886.MP4'
 external_stylesheets = [dbc.themes.BOOTSTRAP, '/assets/styles.css']
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+server = app.server
 
 VIDEO_HEIGHT = 360  
 VIDEO_WIDTH = 640
