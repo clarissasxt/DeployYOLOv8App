@@ -1,7 +1,7 @@
 ## YOLOv8 App with Dash 
 
 ### How to get the app running?
-1. Download the files from Github [here](https://github.com/clarissasxt/DeployYOLOv8App) or Google Drive
+1. Download the files from Github [here](https://github.com/clarissasxt/DeployYOLOv8App) or Google Drive: https://drive.google.com/drive/folders/1u6EBYvqepwR-_x1sK3OLKnwotrdWRJ5Y?usp=sharing
 2. Open files in code editor
 3. Download necessary packages
    - pip install -r requirements.txt
