@@ -96,8 +96,11 @@ def write_pose_video(video_file, csv_file, frame_lock, current_frame):
                         left_elbow_angle, right_elbow_angle, left_knee_angle, right_knee_angle
                     ])
 
-        with frame_lock:
-            current_frame[0] = frame.copy()
+                # Draw keypoints and connections on the frame
+                img_array = result.plot(kpt_line=True)  # Automatically plot keypoints with lines
+
+                with frame_lock:
+                    current_frame[0] = img_array
 
     cap.release()
     cv2.destroyAllWindows()
