@@ -56,7 +56,7 @@ t1.start()
 @app.callback(
     Output('graph-row', 'children'),
     [Input('graph-dropdown', 'value'),
-     Input('interval-component', 'n_intervals')]
+    Input('interval-component', 'n_intervals')]
 )
 def update_graph(selected_graphs, n_intervals):
     try:
@@ -123,4 +123,4 @@ def update_video(n_intervals):
     return frame_src
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(host='0.0.0.0', port=8050, debug=True)
