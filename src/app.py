@@ -53,6 +53,10 @@ frame_lock = threading.Lock()
 t1 = threading.Thread(target=write_pose_video, args=(VIDEO_FILE, CSV_FILE, frame_lock, current_frame))
 t1.start()
 
+def smooth_data(data, window_size=5):
+    """Apply a moving average filter to smooth the data."""
+    return data.rolling(window=window_size, min_periods=1).mean()
+
 @app.callback(
     Output('graph-row', 'children'),
     [Input('graph-dropdown', 'value'),
@@ -63,6 +67,17 @@ def update_graph(selected_graphs, n_intervals):
         data = pd.read_csv(CSV_FILE)
     except Exception as e:
         return []
+    
+    # Apply smoothing
+    window_size = 5  # Adjust this size to control the smoothing effect
+    data['Left Wrist'] = smooth_data(data['Left Wrist'], window_size)
+    data['Right Wrist'] = smooth_data(data['Right Wrist'], window_size)
+    data['Left Elbow'] = smooth_data(data['Left Elbow'], window_size)
+    data['Right Elbow'] = smooth_data(data['Right Elbow'], window_size)
+    data['Left Hip'] = smooth_data(data['Left Hip'], window_size)
+    data['Right Hip'] = smooth_data(data['Right Hip'], window_size)
+    data['Left Knee'] = smooth_data(data['Left Knee'], window_size)
+    data['Right Knee'] = smooth_data(data['Right Knee'], window_size)
 
     x = np.arange(len(data))
 
