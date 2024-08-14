@@ -11,7 +11,7 @@ import dash_bootstrap_components as dbc
 from yolov8_utils import write_pose_video
 
 CSV_FILE = 'keypoints.csv'
-VIDEO_FILE = 'DJI_0087.MP4'
+VIDEO_FILE = 'DJI_0886.MP4'
 
 external_stylesheets = [dbc.themes.BOOTSTRAP, '/assets/styles.css']
 
