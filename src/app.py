@@ -27,11 +27,12 @@ app.layout = html.Div([
             id='graph-dropdown',
             options=[
                 {'label': 'Wrist', 'value': 'Wrist'},
-                {'label': 'Elbow', 'value': 'Elbow'},
-                {'label': 'Hip', 'value': 'Hip'},
-                {'label': 'Knee', 'value': 'Knee'}
+                {'label': 'Left Elbow Angle', 'value': 'Left Elbow Angle'},
+                {'label': 'Right Elbow Angle', 'value': 'Right Elbow Angle'},
+                {'label': 'Left Knee Angle', 'value': 'Left Knee Angle'},
+                {'label': 'Right Knee Angle', 'value': 'Right Knee Angle'}
             ],
-            value=['Wrist', 'Elbow'], # default plots shown on screen
+            value=['Wrist', 'Left Elbow Angle'], # default plots shown on screen
             multi=True,
             className='dropdown-bar'
         )),
@@ -101,6 +102,22 @@ def update_graph(selected_graphs, n_intervals):
             'left': go.Scatter(x=x, y=data['Left Knee'], mode='lines', name='Left Knee', line=dict(width=1)),
             'right': go.Scatter(x=x, y=data['Right Knee'], mode='lines', name='Right Knee', line=dict(width=1)),
             'title': 'Knee Movements'
+        },
+        'Left Elbow Angle': {
+            'angle': go.Scatter(x=x, y=data['Left Elbow Angle'], mode='lines', name='Left Elbow Angle', line=dict(width=1)),
+            'title': 'Left Elbow Angle'
+        },
+        'Right Elbow Angle': {
+            'angle': go.Scatter(x=x, y=data['Right Elbow Angle'], mode='lines', name='Right Elbow Angle', line=dict(width=1)),
+            'title': 'Right Elbow Angle'
+        },
+        'Left Knee Angle': {
+            'angle': go.Scatter(x=x, y=data['Left Knee Angle'], mode='lines', name='Left Knee Angle', line=dict(width=1)),
+            'title': 'Left Knee Angle'
+        },
+        'Right Knee Angle': {
+            'angle': go.Scatter(x=x, y=data['Right Knee Angle'], mode='lines', name='Right Knee Angle', line=dict(width=1)),
+            'title': 'Right Knee Angle'
         }
     }
 
@@ -112,6 +129,8 @@ def update_graph(selected_graphs, n_intervals):
                 fig.add_trace(figures[graph_type]['left'])
             if 'right' in figures[graph_type]:
                 fig.add_trace(figures[graph_type]['right'])
+            if 'angle' in figures[graph_type]:
+                fig.add_trace(figures[graph_type]['angle'])
             fig.update_layout(
                 title=figures[graph_type]['title'], 
                 xaxis_title='Frame Index', 
