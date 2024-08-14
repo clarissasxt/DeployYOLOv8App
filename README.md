@@ -6,7 +6,7 @@
 3. Download necessary packages
    - pip install -r requirements.txt
 4. Go in to correct folder path:
-   - cd src
+   - app.py file is under src folder, so: cd src
 5. Run 'python app.py'
 6. Open up web browser and use the link http://0.0.0.0:8050/
 7. To view on tablet, make sure the tablet and laptop are connected to the same wifi.
