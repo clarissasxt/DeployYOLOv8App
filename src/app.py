@@ -27,12 +27,10 @@ app.layout = html.Div([
             id='graph-dropdown',
             options=[
                 {'label': 'Wrist', 'value': 'Wrist'},
-                {'label': 'Left Elbow Angle', 'value': 'Left Elbow Angle'},
-                {'label': 'Right Elbow Angle', 'value': 'Right Elbow Angle'},
-                {'label': 'Left Knee Angle', 'value': 'Left Knee Angle'},
-                {'label': 'Right Knee Angle', 'value': 'Right Knee Angle'}
+                {'label': 'Elbow Angles', 'value': 'Elbow Angles'},  # Combined Elbow Angles
+                {'label': 'Knee Angles', 'value': 'Knee Angles'}  # Combined Knee Angles
             ],
-            value=['Wrist', 'Left Elbow Angle'],  # default plots shown on screen
+            value=['Wrist', 'Elbow Angles', 'Knee Angles'],  # Default options selected
             multi=True,
             className='dropdown-bar'
         )),
@@ -41,19 +39,18 @@ app.layout = html.Div([
     dbc.Row([
         dbc.Col(html.Div(html.Img(id='live-video', style={'height': VIDEO_HEIGHT, 'width': VIDEO_WIDTH, 'display': 'block', 'margin': 'auto'}))),
     ]),
-    # Center the switch in the middle of the screen
     dbc.Row([
         dbc.Col(
             dbc.Switch(
                 id='keypoint-switch',
                 label="Keypoints",
-                value=False,  # Default is off
+                value=False,
                 className="mb-3"
             ),
-            width="auto",  # Automatically adjust column width
-            style={'textAlign': 'center'}  # Center within the column
+            width="auto",
+            style={'textAlign': 'center'}
         ),
-    ], justify="center", className="mb-4"),  # Center the row and add margin below
+    ], justify="center", className="mb-4"),
     dcc.Interval(
         id='interval-component',
         interval=100,  
@@ -77,85 +74,72 @@ def smooth_data(data, window_size=5):
     [Input('graph-dropdown', 'value'),
      Input('interval-component', 'n_intervals')]
 )
+
 def update_graph(selected_graphs, n_intervals):
     try:
         data = pd.read_csv(CSV_FILE)
     except Exception as e:
         return []
-    
+
     # Apply smoothing
-    window_size = 5  # Adjust this size to control the smoothing effect
+    window_size = 5
     data['Left Wrist'] = smooth_data(data['Left Wrist'], window_size)
     data['Right Wrist'] = smooth_data(data['Right Wrist'], window_size)
     data['Left Elbow'] = smooth_data(data['Left Elbow'], window_size)
     data['Right Elbow'] = smooth_data(data['Right Elbow'], window_size)
-    data['Left Hip'] = smooth_data(data['Left Hip'], window_size)
-    data['Right Hip'] = smooth_data(data['Right Hip'], window_size)
     data['Left Knee'] = smooth_data(data['Left Knee'], window_size)
     data['Right Knee'] = smooth_data(data['Right Knee'], window_size)
+    data['Left Elbow Angle'] = smooth_data(data['Left Elbow Angle'], window_size)
+    data['Right Elbow Angle'] = smooth_data(data['Right Elbow Angle'], window_size)
+    data['Left Knee Angle'] = smooth_data(data['Left Knee Angle'], window_size)
+    data['Right Knee Angle'] = smooth_data(data['Right Knee Angle'], window_size)
 
     x = np.arange(len(data))
 
+    # Combine left and right angles within the figures dictionary
     figures = {
         'Wrist': {
-            'left': go.Scatter(x=x, y=data['Left Wrist'], mode='lines', name='Left Wrist', line=dict(width=1)),
-            'right': go.Scatter(x=x, y=data['Right Wrist'], mode='lines', name='Right Wrist', line=dict(width=1)),
-            'title': 'Wrist Movements'
+            'data': [
+                go.Scatter(x=x, y=data['Left Wrist'], mode='lines', name='Left Wrist', line=dict(width=1)),
+                go.Scatter(x=x, y=data['Right Wrist'], mode='lines', name='Right Wrist', line=dict(width=1))
+            ],
+            'title': 'Wrist Movements',
+            'yaxis_title': 'Pixel Position'
         },
-        'Elbow': {
-            'left': go.Scatter(x=x, y=data['Left Elbow'], mode='lines', name='Left Elbow', line=dict(width=1)),
-            'right': go.Scatter(x=x, y=data['Right Elbow'], mode='lines', name='Right Elbow', line=dict(width=1)),
-            'title': 'Elbow Movements'
+        'Elbow Angles': {
+            'data': [
+                go.Scatter(x=x, y=data['Left Elbow Angle'], mode='lines', name='Left Elbow Angle', line=dict(width=1)),
+                go.Scatter(x=x, y=data['Right Elbow Angle'], mode='lines', name='Right Elbow Angle', line=dict(width=1))
+            ],
+            'title': 'Elbow Angles',
+            'yaxis_title': 'Angle (in degrees)'  # Use degree label
         },
-        'Hip': {
-            'left': go.Scatter(x=x, y=data['Left Hip'], mode='lines', name='Left Hip', line=dict(width=1)),
-            'right': go.Scatter(x=x, y=data['Right Hip'], mode='lines', name='Right Hip', line=dict(width=1)),
-            'title': 'Hip Movements'
-        },
-        'Knee': {
-            'left': go.Scatter(x=x, y=data['Left Knee'], mode='lines', name='Left Knee', line=dict(width=1)),
-            'right': go.Scatter(x=x, y=data['Right Knee'], mode='lines', name='Right Knee', line=dict(width=1)),
-            'title': 'Knee Movements'
-        },
-        'Left Elbow Angle': {
-            'angle': go.Scatter(x=x, y=data['Left Elbow Angle'], mode='lines', name='Left Elbow Angle', line=dict(width=1)),
-            'title': 'Left Elbow Angle'
-        },
-        'Right Elbow Angle': {
-            'angle': go.Scatter(x=x, y=data['Right Elbow Angle'], mode='lines', name='Right Elbow Angle', line=dict(width=1)),
-            'title': 'Right Elbow Angle'
-        },
-        'Left Knee Angle': {
-            'angle': go.Scatter(x=x, y=data['Left Knee Angle'], mode='lines', name='Left Knee Angle', line=dict(width=1)),
-            'title': 'Left Knee Angle'
-        },
-        'Right Knee Angle': {
-            'angle': go.Scatter(x=x, y=data['Right Knee Angle'], mode='lines', name='Right Knee Angle', line=dict(width=1)),
-            'title': 'Right Knee Angle'
+        'Knee Angles': {
+            'data': [
+                go.Scatter(x=x, y=data['Left Knee Angle'], mode='lines', name='Left Knee Angle', line=dict(width=1)),
+                go.Scatter(x=x, y=data['Right Knee Angle'], mode='lines', name='Right Knee Angle', line=dict(width=1))
+            ],
+            'title': 'Knee Angles',
+            'yaxis_title': 'Angle (in degrees)'  # Use degree label
         }
     }
 
+    # Generate graphs for the selected options
     graph_components = []
     for graph_type in selected_graphs:
         if graph_type in figures:
-            fig = go.Figure()
-            if 'left' in figures[graph_type]:
-                fig.add_trace(figures[graph_type]['left'])
-            if 'right' in figures[graph_type]:
-                fig.add_trace(figures[graph_type]['right'])
-            if 'angle' in figures[graph_type]:
-                fig.add_trace(figures[graph_type]['angle'])
+            fig = go.Figure(data=figures[graph_type]['data'])
             fig.update_layout(
-                title=figures[graph_type]['title'], 
-                xaxis_title='Frame Index', 
-                yaxis_title='Pixel Position',
-                margin=dict(t=50, b=30, l=30, r=30), 
+                title=figures[graph_type]['title'],
+                xaxis_title='Frame Index',
+                yaxis_title=figures[graph_type]['yaxis_title'],
+                margin=dict(t=50, b=30, l=30, r=30),
                 height=350
             )
-
             graph_components.append(dbc.Col(dcc.Graph(figure=fig), width=4))
 
     return graph_components
+
 
 @app.callback(
     Output('live-video', 'src'),
