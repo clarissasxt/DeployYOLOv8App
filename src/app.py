@@ -28,9 +28,10 @@ app.layout = html.Div([
             options=[
                 {'label': 'Wrist', 'value': 'Wrist'},
                 {'label': 'Elbow Angles', 'value': 'Elbow Angles'},  # Combined Elbow Angles
-                {'label': 'Knee Angles', 'value': 'Knee Angles'}  # Combined Knee Angles
+                {'label': 'Knee Angles', 'value': 'Knee Angles'}, 
+                {'label': 'Nose', 'value': 'Nose'}
             ],
-            value=['Wrist', 'Elbow Angles', 'Knee Angles'],  # Default options selected
+            value=['Nose', 'Elbow Angles', 'Knee Angles'],  # Default options selected
             multi=True,
             className='dropdown-bar'
         )),
@@ -93,6 +94,7 @@ def update_graph(selected_graphs, n_intervals):
     data['Right Elbow Angle'] = smooth_data(data['Right Elbow Angle'], window_size)
     data['Left Knee Angle'] = smooth_data(data['Left Knee Angle'], window_size)
     data['Right Knee Angle'] = smooth_data(data['Right Knee Angle'], window_size)
+    data['Nose'] = smooth_data(data['Nose'], window_size)
 
     x = np.arange(len(data))
 
@@ -121,6 +123,13 @@ def update_graph(selected_graphs, n_intervals):
             ],
             'title': 'Knee Angles',
             'yaxis_title': 'Angle (in degrees)'  # Use degree label
+        },
+        'Nose': {
+            'data': [
+                go.Scatter(x=x, y=data['Nose'], mode='lines', name='Nose', line=dict(width=1))
+            ],
+            'title': 'Velocity',
+            'yaxis_title': 'Speed (m/s)'
         }
     }
 
@@ -131,7 +140,7 @@ def update_graph(selected_graphs, n_intervals):
             fig = go.Figure(data=figures[graph_type]['data'])
             fig.update_layout(
                 title=figures[graph_type]['title'],
-                xaxis_title='Frame Index',
+                xaxis_title='Time',
                 yaxis_title=figures[graph_type]['yaxis_title'],
                 margin=dict(t=50, b=30, l=30, r=30),
                 height=350
