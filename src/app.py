@@ -27,11 +27,11 @@ app.layout = html.Div([
             id='graph-dropdown',
             options=[
                 {'label': 'Wrist', 'value': 'Wrist'},
-                {'label': 'Elbow Angles', 'value': 'Elbow Angles'},  # Combined Elbow Angles
+                {'label': 'Elbow Angles', 'value': 'Elbow Angles'},
                 {'label': 'Knee Angles', 'value': 'Knee Angles'}, 
                 {'label': 'Nose', 'value': 'Nose'}
             ],
-            value=['Nose', 'Elbow Angles', 'Knee Angles'],  # Default options selected
+            value=['Nose', 'Elbow Angles', 'Knee Angles'],
             multi=True,
             className='dropdown-bar'
         )),
@@ -52,37 +52,46 @@ app.layout = html.Div([
             style={'textAlign': 'center'}
         ),
     ], justify="center", className="mb-4"),
+    dbc.Row([
+        dbc.Col(
+            dbc.Alert(
+                id='alert-message',
+                children='Swimmer is slowing down',
+                color='danger',
+                is_open=False,
+                dismissable=True,
+                duration=4000  # Duration in milliseconds (optional)
+            ),
+            width={"size": 6, "offset": 3},
+        )
+    ], className='mb-4'),
     dcc.Interval(
         id='interval-component',
-        interval=100,  
+        interval=1000,  # Update every second
         n_intervals=0
     )
 ])
 
-current_frame = [None, None]  # Initialize to hold both frames (with and without keypoints)
+current_frame = [None, None]
 frame_lock = threading.Lock()
 
-# Start the thread to write the pose video
 t1 = threading.Thread(target=write_pose_video, args=(VIDEO_FILE, CSV_FILE, frame_lock, current_frame))
 t1.start()
 
 def smooth_data(data, window_size=5):
-    """Apply a moving average filter to smooth the data."""
     return data.rolling(window=window_size, min_periods=1).mean()
 
 @app.callback(
     Output('graph-row', 'children'),
     [Input('graph-dropdown', 'value'),
-     Input('interval-component', 'n_intervals')]
+    Input('interval-component', 'n_intervals')]
 )
-
 def update_graph(selected_graphs, n_intervals):
     try:
         data = pd.read_csv(CSV_FILE)
     except Exception as e:
         return []
 
-    # Apply smoothing
     window_size = 5
     data['Left Wrist'] = smooth_data(data['Left Wrist'], window_size)
     data['Right Wrist'] = smooth_data(data['Right Wrist'], window_size)
@@ -98,7 +107,6 @@ def update_graph(selected_graphs, n_intervals):
 
     x = np.arange(len(data))
 
-    # Combine left and right angles within the figures dictionary
     figures = {
         'Wrist': {
             'data': [
@@ -114,7 +122,7 @@ def update_graph(selected_graphs, n_intervals):
                 go.Scatter(x=x, y=data['Right Elbow Angle'], mode='lines', name='Right Elbow Angle', line=dict(width=1))
             ],
             'title': 'Elbow Angles',
-            'yaxis_title': 'Angle (in degrees)'  # Use degree label
+            'yaxis_title': 'Angle (in degrees)'
         },
         'Knee Angles': {
             'data': [
@@ -122,7 +130,7 @@ def update_graph(selected_graphs, n_intervals):
                 go.Scatter(x=x, y=data['Right Knee Angle'], mode='lines', name='Right Knee Angle', line=dict(width=1))
             ],
             'title': 'Knee Angles',
-            'yaxis_title': 'Angle (in degrees)'  # Use degree label
+            'yaxis_title': 'Angle (in degrees)'
         },
         'Nose': {
             'data': [
@@ -133,7 +141,6 @@ def update_graph(selected_graphs, n_intervals):
         }
     }
 
-    # Generate graphs for the selected options
     graph_components = []
     for graph_type in selected_graphs:
         if graph_type in figures:
@@ -149,26 +156,35 @@ def update_graph(selected_graphs, n_intervals):
 
     return graph_components
 
-
 @app.callback(
     Output('live-video', 'src'),
     [Input('interval-component', 'n_intervals'),
-    Input('keypoint-switch', 'value')]  # Switch Input
+     Input('keypoint-switch', 'value')]
 )
 def update_video(n_intervals, show_keypoints):
     with frame_lock:
         if current_frame[0] is not None and current_frame[1] is not None:
-            # Show the appropriate frame based on the switch state
-            if show_keypoints:
-                frame = current_frame[0]  # Frame with keypoints
-            else:
-                frame = current_frame[1]  # Frame without keypoints
-            
+            frame = current_frame[0] if show_keypoints else current_frame[1]
             ret, buffer = cv2.imencode('.jpg', frame)
             frame_src = 'data:image/jpg;base64,' + base64.b64encode(buffer).decode('utf-8')
         else:
             frame_src = ''
     return frame_src
 
+@app.callback(
+    Output('alert-message', 'is_open'),
+    [Input('interval-component', 'n_intervals')]
+)
+def update_alert(n_intervals):
+    try:
+        data = pd.read_csv(CSV_FILE)
+        nose_position = data['Nose'].iloc[-1]  # Get the latest Nose position
+    except Exception as e:
+        nose_position = float('inf')  # If there's an error, treat it as no alert
+
+    threshold = 200
+    return nose_position < threshold
+
 if __name__ == '__main__':
     app.run_server(host='0.0.0.0', port=8050, debug=True)
+
