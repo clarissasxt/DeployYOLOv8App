@@ -11,7 +11,7 @@ import dash_bootstrap_components as dbc
 from yolov8_utils import write_pose_video
 
 CSV_FILE = 'keypoints.csv'
-VIDEO_FILE = 'DJI_0886.MP4'
+VIDEO_FILE = 'DJI_0957.MP4'
 
 external_stylesheets = [dbc.themes.BOOTSTRAP, '/assets/styles.css']
 
@@ -67,7 +67,7 @@ app.layout = html.Div([
     ], className='mb-4'),
     dcc.Interval(
         id='interval-component',
-        interval=1000,  # Update every second
+        interval=200,  # Update every second
         n_intervals=0
     )
 ])
@@ -81,6 +81,7 @@ t1.start()
 def smooth_data(data, window_size=5):
     return data.rolling(window=window_size, min_periods=1).mean()
 
+'''
 @app.callback(
     Output('graph-row', 'children'),
     [Input('graph-dropdown', 'value'),
@@ -155,6 +156,7 @@ def update_graph(selected_graphs, n_intervals):
             graph_components.append(dbc.Col(dcc.Graph(figure=fig), width=4))
 
     return graph_components
+'''
 
 @app.callback(
     Output('live-video', 'src'),
@@ -171,6 +173,7 @@ def update_video(n_intervals, show_keypoints):
             frame_src = ''
     return frame_src
 
+'''
 @app.callback(
     Output('alert-message', 'is_open'),
     [Input('interval-component', 'n_intervals')]
@@ -184,6 +187,7 @@ def update_alert(n_intervals):
 
     threshold = 200
     return nose_position < threshold
+'''
 
 if __name__ == '__main__':
     app.run_server(host='0.0.0.0', port=8050, debug=True)

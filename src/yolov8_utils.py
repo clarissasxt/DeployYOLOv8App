@@ -3,12 +3,13 @@ import cv2
 from ultralytics import YOLO
 import numpy as np
 
-VIDEO_FILE = 'DJI_0886.MP4'
+VIDEO_FILE = 'DJI_0957.MP4'
 MODEL_PATH = 'yolov8n-pose.pt'
 CSV_FILE = 'keypoints.csv'
 
 # Load the YOLOv8 model
 model = YOLO(MODEL_PATH)
+kargs = {'verbose':False}
 
 # Video capture
 cap = cv2.VideoCapture(VIDEO_FILE)
@@ -28,6 +29,7 @@ with open(CSV_FILE, 'w', newline='') as file:
     writer = csv.writer(file)
     writer.writerow(fieldnames)
 
+'''
 def calculate_angle(point1, point2, point3):
     """
     Calculate the angle between three points: point1 (A), point2 (B), point3 (C).
@@ -50,6 +52,7 @@ def calculate_angle(point1, point2, point3):
     # Calculate the angle in radians and then convert it to degrees
     angle = np.arccos(cos_angle)
     return np.degrees(angle)
+'''
 
 def write_pose_video(video_file, csv_file, frame_lock, current_frame):
     cap = cv2.VideoCapture(video_file)
@@ -60,7 +63,7 @@ def write_pose_video(video_file, csv_file, frame_lock, current_frame):
             break
 
         # Process frame with YOLOv8
-        results = model(frame)
+        results = model(frame, **kargs)
         if results:
             result = results[0]
             if hasattr(result, 'keypoints') and result.keypoints.data.numel() > 0:
@@ -80,6 +83,9 @@ def write_pose_video(video_file, csv_file, frame_lock, current_frame):
                 right_knee = keypoints[14]
                 left_ankle = keypoints[15]
                 right_ankle = keypoints[16]
+
+                def calculate_angle(a,b,c):
+                    return 0
 
                 # Calculate angles
                 left_elbow_angle = calculate_angle(left_shoulder, left_elbow, left_wrist)
